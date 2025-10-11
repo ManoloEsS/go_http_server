@@ -24,7 +24,7 @@ func HandlerValidateChirp(w http.ResponseWriter, r *http.Request) {
 	newChirp := chirp{}
 	err := decoder.Decode(&newChirp)
 	if err != nil {
-		respondWithError(w, 500, "Couldn't decode parameters", err)
+		respondWithError(w, 500, "Couldn't decode chirp", err)
 		return
 	}
 

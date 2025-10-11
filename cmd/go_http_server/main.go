@@ -18,6 +18,7 @@ func main() {
 
 	//get database connection url
 	dbURL := os.Getenv("DB_URL")
+	dbPlatform := os.Getenv("PLATFORM")
 
 	//open
 	db, err := sql.Open("postgres", dbURL)
@@ -58,6 +59,8 @@ func main() {
 	mux.HandleFunc("POST /admin/reset", cfg.HandlerResetMetrics)
 	//handler to validate chirp length
 	mux.HandleFunc("POST /api/validate_chirp", handlers.HandlerValidateChirp)
+	//handler to create a user
+	mux.HandleFunc("POST /api/users", cfg.HandlerCreateUser)
 
 	log.Printf("Serving files from %s on port: %s\n", filepathRoot, port)
 
