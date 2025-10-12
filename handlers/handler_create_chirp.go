@@ -1,40 +1,40 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"go_http_server/internal/config"
+	"go_http_server/internal/database"
 	"net/http"
 	"strings"
-
-	"github.com/google/uuid"
 )
 
 // function that takes a request to /api/chirps and responds with a JSON or error response
-func HandlerCreateChirp(w http.ResponseWriter, r *http.Request) {
+func (cfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Request) {
 	//chirp struct to use for decoding request
-	type chirp struct {
-		Body   string    `json:"body"`
-		UserId uuid.UUID `json:"user_id"`
-	}
-
-	requestData := chirp{}
+	newRequestChirpParams := database.CreateChirpParams{}
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&requestData)
+	err := decoder.Decode(&newRequestChirpParams)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't decode chirp", err)
 	}
 
+	//validate chirp body length and filter profanity
 	//if chirp body is too long respond with error stating chirp is too long
-	if len(requestData.Body) > config.MaxChirpLength {
+	if len(newRequestChirpParams.Body) > config.MaxChirpLength {
 		respondWithError(w, 400, "Chirp is too long", nil)
 		return
 	}
+	newRequestChirpParams.Body = profaneFilter(newRequestChirpParams.Body)
 
-	cleanedChirp := profaneFilter(requestData.Body)
+	//Add chirp to database and return the struct
+	validatedChirp, err := cfg.Db.CreateChirp(context.Background(), newRequestChirpParams)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "couldn't save chirp to database", err)
+	}
+
 	//respond with success code and response instance
-	respondWithJSON(w, 200, response{
-		Body: cleanedChirp,
-	})
+	respondWithJSON(w, 200, validatedChirp)
 
 }
 
