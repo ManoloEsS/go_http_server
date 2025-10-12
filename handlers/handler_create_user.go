@@ -3,6 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 // Method of ApiConfig. takes a http.ResponseWriter and a http.Request and creates
@@ -24,5 +27,20 @@ func (cfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Request) 
 		respondWithError(w, 500, "Couldn't create user", err)
 	}
 
-	respondWithJSON(w, 201, newUser)
+	newResponseUser := responseUser{
+		ID:        newUser.ID,
+		CreatedAt: newUser.CreatedAt,
+		UpdatedAt: newUser.UpdatedAt,
+		Email:     newUser.Email,
+	}
+
+	respondWithJSON(w, 201, newResponseUser)
+}
+
+// struct used to create the json response with appropriate fields from user created by cfg.Db.CreateUser
+type responseUser struct {
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Email     string    `json:"email"`
 }

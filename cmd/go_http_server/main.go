@@ -15,10 +15,15 @@ import (
 func main() {
 	//load .env file
 	godotenv.Load()
-
 	//get database connection url
 	dbURL := os.Getenv("DB_URL")
+	if dbURL == "" {
+		log.Fatal("DB_URL must be set")
+	}
 	dbPlatform := os.Getenv("PLATFORM")
+	if dbPlatform == "" {
+		log.Fatal("PLATFORM must be set")
+	}
 
 	//open
 	db, err := sql.Open("postgres", dbURL)
@@ -34,7 +39,8 @@ func main() {
 
 	//initialize config to share state
 	cfg := &handlers.ApiConfig{
-		Db: dbQueries,
+		Db:       dbQueries,
+		Platform: dbPlatform,
 	}
 
 	//initialize file server
@@ -56,11 +62,13 @@ func main() {
 	//handler for hit metrics check
 	mux.HandleFunc("GET /admin/metrics", cfg.HandlerRequestMetrics)
 	//handler to reset metrics
-	mux.HandleFunc("POST /admin/reset", cfg.HandlerResetMetrics)
+	mux.HandleFunc("POST /admin/reset", cfg.HandlerResetUsers)
 	//handler to validate chirp length
 	mux.HandleFunc("POST /api/validate_chirp", handlers.HandlerValidateChirp)
 	//handler to create a user
 	mux.HandleFunc("POST /api/users", cfg.HandlerCreateUser)
+	//handler to create chirp
+	mux.HandleFunc("POST /api/chirps", handlers.HandlerCreateChirp)
 
 	log.Printf("Serving files from %s on port: %s\n", filepathRoot, port)
 

@@ -19,9 +19,17 @@ func (cfg *ApiConfig) HandlerRequestMetrics(w http.ResponseWriter, r *http.Reque
 }
 
 // function that writes the response for reset metrics
-func (cfg *ApiConfig) HandlerResetMetrics(w http.ResponseWriter, r *http.Request) {
+func (cfg *ApiConfig) HandlerResetUsers(w http.ResponseWriter, r *http.Request) {
+	if cfg.Platform != "dev" {
+		respondWithError(w, http.StatusForbidden, "Reset is only allowed in env environment", nil)
+		return
+	}
 	cfg.fileServerHits.Store(0)
+	err := cfg.Db.DeleteAllUsers(r.Context())
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to reset database", err)
+	}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Metrics have been reset"))
+	w.Write([]byte("All users have been deleted and hits reset to 0"))
 }
