@@ -3,48 +3,89 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"go_http_server/internal/config"
 	"go_http_server/internal/database"
 	"net/http"
 	"strings"
+	"time"
+
+	"github.com/google/uuid"
 )
 
-// function that takes a request to /api/chirps and responds with a JSON or error response
+// function that takes a request to /api/chirps, creates a new Chirp saved at table Chirps and responds with a JSON struct of the Chirp data or error response
 func (cfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Request) {
 	//chirp struct to use for decoding request
-	newRequestChirpParams := database.CreateChirpParams{}
+	type ChirpParams struct {
+		Body   string    `json:"body"`
+		UserID uuid.UUID `json:"user_id"`
+	}
+	newRequestChirpParams := ChirpParams{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&newRequestChirpParams)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't decode chirp", err)
+		return
 	}
 
 	//validate chirp body length and filter profanity
-	//if chirp body is too long respond with error stating chirp is too long
-	if len(newRequestChirpParams.Body) > config.MaxChirpLength {
-		respondWithError(w, 400, "Chirp is too long", nil)
-		return
+	filteredChirpBody, err := validateChirp(newRequestChirpParams.Body)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error(), err)
 	}
-	newRequestChirpParams.Body = profaneFilter(newRequestChirpParams.Body)
 
+	validatedChirpData := database.CreateChirpParams{
+		Body:   filteredChirpBody,
+		UserID: newRequestChirpParams.UserID,
+	}
 	//Add chirp to database and return the struct
-	validatedChirp, err := cfg.Db.CreateChirp(context.Background(), newRequestChirpParams)
+	validatedChirp, err := cfg.Db.CreateChirp(context.Background(), validatedChirpData)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "couldn't save chirp to database", err)
+		return
+	}
+
+	resp := struct {
+		ID        uuid.UUID `json:"id"`
+		CreatedAt time.Time `json:"created_at"`
+		UpdatedAt time.Time `json:"updated_at"`
+		Body      string    `json:"body"`
+		UserID    uuid.UUID `json:"user_id"`
+	}{
+		ID:        validatedChirp.ID,
+		CreatedAt: validatedChirp.CreatedAt,
+		UpdatedAt: validatedChirp.CreatedAt,
+		Body:      validatedChirp.Body,
+		UserID:    validatedChirp.UserID,
 	}
 
 	//respond with success code and response instance
-	respondWithJSON(w, 200, validatedChirp)
-
+	respondWithJSON(w, 201, resp)
 }
 
-func profaneFilter(prefilter string) string {
+func validateChirp(body string) (string, error) {
+	if len(body) > config.MaxChirpLength {
+		return "", errors.New("Chirp is too long")
+	}
+
+	filteredBody := profaneFilter(body, badWords)
+
+	return filteredBody, nil
+
+}
+func profaneFilter(prefilter string, profanity map[string]struct{}) string {
 	splitString := strings.Split(prefilter, " ")
 	for i, word := range splitString {
-		switch strings.ToLower(word) {
-		case "kerfuffle", "sharbert", "fornax":
+		loweredWord := strings.ToLower(word)
+		if _, ok := badWords[loweredWord]; ok {
 			splitString[i] = "****"
 		}
 	}
 	return strings.Join(splitString, " ")
+}
+
+var badWords = map[string]struct{}{
+	"kerfuffle": {},
+	"sharbert":  {},
+	"fornax":    {},
 }

@@ -68,7 +68,7 @@ func main() {
 	//handler to create a user
 	mux.HandleFunc("POST /api/users", cfg.HandlerCreateUser)
 	//handler to create chirp
-	mux.HandleFunc("POST /api/chirps", handlers.HandlerCreateChirp)
+	mux.HandleFunc("POST /api/chirps", cfg.HandlerCreateChirp)
 
 	log.Printf("Serving files from %s on port: %s\n", filepathRoot, port)
 

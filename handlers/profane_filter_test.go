@@ -23,7 +23,7 @@ func TestProfaneFilter(t *testing.T) {
 		testCase := testCase
 		t.Run(testCase.input, func(t *testing.T) {
 			t.Parallel()
-			actualOutput := profaneFilter(testCase.input)
+			actualOutput := profaneFilter(testCase.input, badWords)
 			if actualOutput != testCase.expected {
 				t.Errorf("expected profaneFilter(%s) to be %s but got %s", testCase.input, testCase.expected, actualOutput)
 			}
