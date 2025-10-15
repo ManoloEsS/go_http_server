@@ -71,6 +71,8 @@ func main() {
 	mux.HandleFunc("POST /api/chirps", cfg.HandlerCreateChirp)
 	//handler to retrieve all chirps in database
 	mux.HandleFunc("GET /api/chirps", cfg.HandlerGetAllChirps)
+	//handler that returns a single chirp using the id as a parameter
+	mux.HandleFunc("GET /api/chirps/{chirpID}", cfg.HandlerGetChirpById)
 
 	log.Printf("Serving files from %s on port: %s\n", filepathRoot, port)
 
