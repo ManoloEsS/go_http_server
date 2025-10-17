@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"go_http_server/internal/config"
-	"go_http_server/internal/database"
 	"net/http"
-	"server"
 	"strings"
 	"time"
 
+	"github.com/ManoloEsS/go_http_server/internal/config"
+	"github.com/ManoloEsS/go_http_server/internal/database"
+	"github.com/ManoloEsS/go_http_server/server"
 	"github.com/google/uuid"
 )
 
@@ -25,14 +25,14 @@ func (cfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Request)
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&newRequestChirpParams)
 	if err != nil {
-		server.RespondWithJSON(w, http.StatusInternalServerError, "Couldn't decode chirp", err)
+		server.RespondWithError(w, http.StatusInternalServerError, "Couldn't decode chirp", err)
 		return
 	}
 
 	//validate chirp body length and filter profanity
 	filteredChirpBody, err := validateChirp(newRequestChirpParams.Body)
 	if err != nil {
-		server.RespondWithJSON(w, http.StatusBadRequest, err.Error(), err)
+		server.RespondWithError(w, http.StatusBadRequest, err.Error(), err)
 	}
 
 	validatedChirpData := database.CreateChirpParams{
@@ -42,7 +42,7 @@ func (cfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Request)
 	//Add chirp to database and return the struct
 	validatedChirp, err := cfg.Db.CreateChirp(context.Background(), validatedChirpData)
 	if err != nil {
-		server.RespondWithJSON(w, http.StatusInternalServerError, "couldn't save chirp to database", err)
+		server.RespondWithError(w, http.StatusInternalServerError, "couldn't save chirp to database", err)
 		return
 	}
 
@@ -78,7 +78,7 @@ func profaneFilter(prefilter string, profanity map[string]struct{}) string {
 	splitString := strings.Split(prefilter, " ")
 	for i, word := range splitString {
 		loweredWord := strings.ToLower(word)
-		if _, ok := badWords[loweredWord]; ok {
+		if _, ok := profanity[loweredWord]; ok {
 			splitString[i] = "****"
 		}
 	}

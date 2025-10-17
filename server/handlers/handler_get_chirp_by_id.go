@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"net/http"
-	"server"
 
+	"github.com/ManoloEsS/go_http_server/server"
 	"github.com/google/uuid"
 )
 

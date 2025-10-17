@@ -3,9 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"server"
 	"time"
 
+	"github.com/ManoloEsS/go_http_server/server"
 	"github.com/google/uuid"
 )
 

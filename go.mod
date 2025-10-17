@@ -1,4 +1,4 @@
-module go_http_server
+module github.com/ManoloEsS/go_http_server
 
 go 1.25.1
 

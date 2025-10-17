@@ -3,7 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"server"
+
+	"github.com/ManoloEsS/go_http_server/server"
 )
 
 // function that validates a chirp and responds with a JSON or error

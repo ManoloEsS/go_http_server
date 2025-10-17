@@ -1,13 +1,13 @@
 package main
 
 import (
-	"database"
 	"database/sql"
-	"handlers"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/ManoloEsS/go_http_server/internal/database"
+	"github.com/ManoloEsS/go_http_server/server/handlers"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )

@@ -3,7 +3,8 @@ package handlers
 import (
 	"fmt"
 	"net/http"
-	"server"
+
+	"github.com/ManoloEsS/go_http_server/server"
 )
 
 // function that writes the response for metrics check

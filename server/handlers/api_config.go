@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"database"
 	"sync/atomic"
+
+	"github.com/ManoloEsS/go_http_server/internal/database"
 )
 
 // api config to store a state

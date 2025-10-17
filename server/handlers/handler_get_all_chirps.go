@@ -2,7 +2,8 @@ package handlers
 
 import (
 	"net/http"
-	"server"
+
+	"github.com/ManoloEsS/go_http_server/server"
 )
 
 func (cfg *ApiConfig) HandlerGetAllChirps(w http.ResponseWriter, r *http.Request) {
