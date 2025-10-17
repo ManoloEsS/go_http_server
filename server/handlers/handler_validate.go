@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"server"
 )
 
 // function that validates a chirp and responds with a JSON or error
@@ -22,7 +23,7 @@ func HandlerValidateChirp(w http.ResponseWriter, r *http.Request) {
 	newChirp := chirp{}
 	err := decoder.Decode(&newChirp)
 	if err != nil {
-		respondWithError(w, 500, "Couldn't decode chirp", err)
+		server.RespondWithError(w, 500, "Couldn't decode chirp", err)
 		return
 	}
 

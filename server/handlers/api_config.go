@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"go_http_server/internal/database"
+	"database"
 	"sync/atomic"
 )
 

@@ -1,9 +1,9 @@
 package main
 
 import (
+	"database"
 	"database/sql"
-	"go_http_server/handlers"
-	"go_http_server/internal/database"
+	"handlers"
 	"log"
 	"net/http"
 	"os"

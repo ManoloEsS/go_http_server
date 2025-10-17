@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"server"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,12 +20,12 @@ func (cfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Request) 
 	userEmail := email{}
 	err := decoder.Decode(&userEmail)
 	if err != nil {
-		respondWithError(w, 500, "Couldn't decode user email", err)
+		server.RespondWithError(w, 500, "Couldn't decode user email", err)
 	}
 
 	newUser, err := cfg.Db.CreateUser(r.Context(), userEmail.Email)
 	if err != nil {
-		respondWithError(w, 500, "Couldn't create user", err)
+		server.RespondWithError(w, 500, "Couldn't create user", err)
 	}
 
 	newResponseUser := responseUser{
@@ -34,7 +35,7 @@ func (cfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Request) 
 		Email:     newUser.Email,
 	}
 
-	respondWithJSON(w, 201, newResponseUser)
+	server.RespondWithJSON(w, 201, newResponseUser)
 }
 
 // struct used to create the json response with appropriate fields from user created by cfg.Db.CreateUser

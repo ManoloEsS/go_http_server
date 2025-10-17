@@ -2,14 +2,15 @@ package handlers
 
 import (
 	"net/http"
+	"server"
 )
 
 func (cfg *ApiConfig) HandlerGetAllChirps(w http.ResponseWriter, r *http.Request) {
 	chirps, err := cfg.Db.GetAllChirps(r.Context())
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error(), err)
+		server.RespondWithError(w, http.StatusInternalServerError, err.Error(), err)
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, chirps)
+	server.RespondWithJSON(w, http.StatusOK, chirps)
 }

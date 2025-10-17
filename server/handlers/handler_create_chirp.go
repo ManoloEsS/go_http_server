@@ -7,6 +7,7 @@ import (
 	"go_http_server/internal/config"
 	"go_http_server/internal/database"
 	"net/http"
+	"server"
 	"strings"
 	"time"
 
@@ -24,14 +25,14 @@ func (cfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Request)
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&newRequestChirpParams)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Couldn't decode chirp", err)
+		server.RespondWithJSON(w, http.StatusInternalServerError, "Couldn't decode chirp", err)
 		return
 	}
 
 	//validate chirp body length and filter profanity
 	filteredChirpBody, err := validateChirp(newRequestChirpParams.Body)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error(), err)
+		server.RespondWithJSON(w, http.StatusBadRequest, err.Error(), err)
 	}
 
 	validatedChirpData := database.CreateChirpParams{
@@ -41,7 +42,7 @@ func (cfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Request)
 	//Add chirp to database and return the struct
 	validatedChirp, err := cfg.Db.CreateChirp(context.Background(), validatedChirpData)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "couldn't save chirp to database", err)
+		server.RespondWithJSON(w, http.StatusInternalServerError, "couldn't save chirp to database", err)
 		return
 	}
 
@@ -60,7 +61,7 @@ func (cfg *ApiConfig) HandlerCreateChirp(w http.ResponseWriter, r *http.Request)
 	}
 
 	//respond with success code and response instance
-	respondWithJSON(w, 201, resp)
+	server.RespondWithJSON(w, 201, resp)
 }
 
 func validateChirp(body string) (string, error) {
